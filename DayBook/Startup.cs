@@ -1,4 +1,5 @@
-﻿using DayBook.Models;
+﻿using DayBook.Content;
+using DayBook.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin;
@@ -19,16 +20,16 @@ namespace DayBook
         {
             ApplicationDbContext context = new ApplicationDbContext();
             var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
-            if (!roleManager.RoleExists("admin"))
+            if (!roleManager.RoleExists(ConstHelper.ADMINROLE))
             {
                 var adminRole = new IdentityRole();
-                adminRole.Name = "admin";
+                adminRole.Name = ConstHelper.ADMINROLE;
                 roleManager.Create(adminRole);
             }
-            if (!roleManager.RoleExists("user"))
+            if (!roleManager.RoleExists(ConstHelper.USERROLE))
             {
                 var userRole = new IdentityRole();
-                userRole.Name = "user";
+                userRole.Name = ConstHelper.USERROLE;
                 roleManager.Create(userRole);
             }
 

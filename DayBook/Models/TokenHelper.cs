@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Web;
 
 namespace DayBook.Models
@@ -26,7 +27,8 @@ namespace DayBook.Models
         /// <returns>true if token valid, otherwise return false</returns>
         public static bool IsTokenValid(string token)
         {
-            byte[] data = Convert.FromBase64String(token);
+            var data = UTF8Encoding.UTF8.GetBytes(token);
+            //var data = Convert.FromBase64String(token);
             DateTime when = DateTime.FromBinary(BitConverter.ToInt64(data, 0));
             if (when < DateTime.UtcNow.AddHours(-24))
             {

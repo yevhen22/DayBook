@@ -9,6 +9,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using DayBook.Models;
+using DayBook.Content;
 
 namespace DayBook.Controllers
 {
@@ -79,7 +80,11 @@ namespace DayBook.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                    return RedirectToLocal(returnUrl);
+                    {
+                        if (User.IsInRole(ConstHelper.USERROLE))
+                            return RedirectToLocal(returnUrl);
+                        else return Redirect("/Home/Contact");
+                    }
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:
@@ -87,7 +92,10 @@ namespace DayBook.Controllers
                 case SignInStatus.Failure:
                 default:
                     ModelState.AddModelError("", "Invalid login attempt.");
-                    return View(model);
+                    if (User.IsInRole(ConstHelper.ADMINROLE))
+                        return RedirectPermanent("/Home/Contact");
+                    else
+                        return View(model);
             }
         }
 
@@ -134,25 +142,17 @@ namespace DayBook.Controllers
             }
         }
 
-        //
-        // GET: /Account/Register
-        //[AllowAnonymous]
-        //public ActionResult Register()
-        //{
-        //    return View();
-        //}
-
         [AllowAnonymous]
         public ActionResult Register(string tokenId)
         {
             if (tokenId != null)
             {
-                if (tokenId.Equals("1qwer22"))
+                if (TokenHelper.IsTokenValid(tokenId))
                 {
                     return View();
                 }
             }
-            return RedirectPermanent("/Account/Login");
+            return RedirectPermanent("/Error");
         }
 
         //
@@ -180,8 +180,6 @@ namespace DayBook.Controllers
                 }
                 AddErrors(result);
             }
-
-            // If we got this far, something failed, redisplay form
             return View(model);
         }
 
@@ -346,7 +344,7 @@ namespace DayBook.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                    return RedirectToLocal(returnUrl);
+                     return RedirectToLocal(returnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:

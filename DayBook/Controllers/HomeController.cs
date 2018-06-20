@@ -44,7 +44,7 @@ namespace DayBook.Controllers
                     var receiverEmail = new MailAddress(model.EmailAdress, "Receiver");
                     var password = "yevhen_987654";
                     var sub = "invitation";
-                    var body = ConstHelper.RegistrationLinkTemplate + TokenHelper.GenerateToken();
+                    var body = model.Message + "\n" + ConstHelper.RegistrationLinkTemplate + TokenHelper.GenerateToken();
                     var smtp = new SmtpClient
                     {
                         Host = "smtp.gmail.com",
@@ -61,6 +61,7 @@ namespace DayBook.Controllers
                     })
                     {
                         await Task.Run(() => smtp.Send(mess));
+                        model = null;
                     }
                     return View();
                 }
@@ -69,7 +70,7 @@ namespace DayBook.Controllers
             {
                 ViewBag.Error = "Some Error";
             }
-            return View();
+            return View(model);
         }
 
         public ActionResult Sent()

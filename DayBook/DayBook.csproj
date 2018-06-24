@@ -197,6 +197,7 @@
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Content\ConstHelper.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\DayBooksController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Global.asax.cs">
@@ -206,8 +207,17 @@
     <Compile Include="Migrations\201806191024212_roles.Designer.cs">
       <DependentUpon>201806191024212_roles.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201806241432574_datetime.cs" />
+    <Compile Include="Migrations\201806241432574_datetime.Designer.cs">
+      <DependentUpon>201806241432574_datetime.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201806241617551_daybookmodelfixes.cs" />
+    <Compile Include="Migrations\201806241617551_daybookmodelfixes.Designer.cs">
+      <DependentUpon>201806241617551_daybookmodelfixes.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
+    <Compile Include="Models\DayBookModel.cs" />
     <Compile Include="Models\EmailFormModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
@@ -274,6 +284,11 @@
     <Content Include="Views\Manage\VerifyPhoneNumber.cshtml" />
     <Content Include="Views\Shared\Lockout.cshtml" />
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
+    <Content Include="Views\DayBooks\Create.cshtml" />
+    <Content Include="Views\DayBooks\Delete.cshtml" />
+    <Content Include="Views\DayBooks\Details.cshtml" />
+    <Content Include="Views\DayBooks\Edit.cshtml" />
+    <Content Include="Views\DayBooks\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -294,6 +309,12 @@
   <ItemGroup>
     <EmbeddedResource Include="Migrations\201806191024212_roles.resx">
       <DependentUpon>201806191024212_roles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806241432574_datetime.resx">
+      <DependentUpon>201806241432574_datetime.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201806241617551_daybookmodelfixes.resx">
+      <DependentUpon>201806241617551_daybookmodelfixes.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

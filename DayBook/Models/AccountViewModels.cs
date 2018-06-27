@@ -61,6 +61,9 @@ namespace DayBook.Models
 
         [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
+
+        [Display(Name = "Captcha")]
+        public string Captcha { get; set; }
     }
 
     public class RegisterViewModel

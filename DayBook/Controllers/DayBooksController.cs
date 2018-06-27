@@ -4,6 +4,7 @@ using System.Data;
 using System.Data.Entity;
 using System.Linq;
 using System.Net;
+using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -29,6 +30,7 @@ namespace DayBook.Controllers
             }
             return View();
         }
+
 
         // GET: DayBooks/Details/5
         public async Task<ActionResult> Details(int? id)
@@ -65,11 +67,11 @@ namespace DayBook.Controllers
                 dayBook.ApplicationUser = currentUser;
                 dayBook.ApplicationUserId = User.Identity.GetUserId();
                 dayBook.CreationTime = DateTime.Now;
+                //dayBook.DayRecord = CryptoHelper.Encode(dayBook.DayRecord).ToString();
                 db.DayBooks.Add(dayBook);
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-
             return View(dayBook);
         }
 
@@ -112,6 +114,7 @@ namespace DayBook.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             DayBookModel dayBook = await db.DayBooks.FindAsync(id);
+
             if (dayBook == null)
             {
                 return HttpNotFound();
@@ -125,9 +128,22 @@ namespace DayBook.Controllers
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
             DayBookModel dayBook = db.DayBooks.Find(id);
-            db.DayBooks.Remove(dayBook);
-            await db.SaveChangesAsync();
+            if (CheckCreationalTime(dayBook))
+            {
+                db.DayBooks.Remove(dayBook);
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
             return RedirectToAction("Index");
+        }
+
+        private bool CheckCreationalTime(DayBookModel dayBook)
+        {
+            double differenceInDays = (DateTime.Now - dayBook.CreationTime).TotalDays;
+            if (differenceInDays > 2)
+                return false;
+            else
+                return true;
         }
 
         protected override void Dispose(bool disposing)

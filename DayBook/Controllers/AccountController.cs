@@ -10,6 +10,13 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using DayBook.Models;
 using DayBook.Content;
+using Microsoft.AspNet.Identity.EntityFramework;
+using System.Runtime.Remoting.Contexts;
+using System.IO;
+using System.Drawing;
+using System.Drawing.Text;
+using System.Drawing.Drawing2D;
+using System.Text;
 
 namespace DayBook.Controllers
 {
@@ -69,22 +76,41 @@ namespace DayBook.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Login(LoginViewModel model, string returnUrl)
         {
+            ApplicationDbContext dbContext = new ApplicationDbContext();
+
             if (!ModelState.IsValid)
             {
+                return View(model);
+            }
+
+            if (Session["Captcha"] == null || Session["Captcha"].ToString() != model.Captcha)
+            {
+                ModelState.AddModelError("Captcha", "Wrong value of sum, please try again.");
+                //dispay error and generate a new captcha 
                 return View(model);
             }
 
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+
+            var applicationDbContext = HttpContext.GetOwinContext().Get<ApplicationDbContext>();
+            var user = applicationDbContext.Users.FirstOrDefault(p => p.Email == model.Email);
+
             switch (result)
             {
                 case SignInStatus.Success:
                     {
-                        if (User.IsInRole(ConstHelper.USERROLE))
+                        if (user.UserRole.Equals(ConstHelper.USERROLE))
                             return Redirect("/DayBooks/Index");
-
-                        else return Redirect("/Home/Contact");
+                        else
+                            if (user.UserRole.Equals(ConstHelper.ADMINROLE))
+                            return Redirect("/Home/Contact");
+                        else
+                        {
+                            AuthenticationManager.SignOut(DefaultAuthenticationTypes.ApplicationCookie);
+                            return RedirectToLocal(returnUrl);
+                        }
                     }
                 case SignInStatus.LockedOut:
                     return View("Lockout");
@@ -93,14 +119,72 @@ namespace DayBook.Controllers
                 case SignInStatus.Failure:
                 default:
                     ModelState.AddModelError("", "Invalid login attempt.");
-                    if (User.IsInRole(ConstHelper.ADMINROLE))
-                        return RedirectPermanent("/Home/Contact");
-                    else
-                        return View(model);
+                    return View(model);
             }
         }
 
-        //
+
+        private string GetRandomText()
+        {
+            StringBuilder randomText = new StringBuilder();
+            string alphabets = "012345679ACEFGHKLMNPRSWXZabcdefghijkhlmnopqrstuvwxyz";
+            Random r = new Random();
+            for (int j = 0; j <= 5; j++)
+            {
+                randomText.Append(alphabets[r.Next(alphabets.Length)]);
+            }
+            return randomText.ToString();
+        }
+
+        public FileResult GetCaptchaImage()
+        {
+            string text = Session["CAPTCHA"].ToString();
+
+            //first, create a dummy bitmap just to get a graphics object
+            Image img = new Bitmap(1, 1);
+            Graphics drawing = Graphics.FromImage(img);
+
+            Font font = new Font("Arial", 15);
+            //measure the string to see how big the image needs to be
+            SizeF textSize = drawing.MeasureString(text, font);
+
+            //free up the dummy image and old graphics object
+            img.Dispose();
+            drawing.Dispose();
+
+            //create a new image of the right size
+            img = new Bitmap((int)textSize.Width + 40, (int)textSize.Height + 20);
+            drawing = Graphics.FromImage(img);
+
+            Color backColor = Color.SeaShell;
+            Color textColor = Color.Red;
+            //paint the background
+            drawing.Clear(backColor);
+
+            //create a brush for the text
+            Brush textBrush = new SolidBrush(textColor);
+
+            drawing.DrawString(text, font, textBrush, 20, 10);
+
+            drawing.Save();
+
+            font.Dispose();
+            textBrush.Dispose();
+            drawing.Dispose();
+
+            MemoryStream ms = new MemoryStream();
+            img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
+            img.Dispose();
+
+            return File(ms.ToArray(), "image/png");
+        }
+
+        public ActionResult CustomCaptcha()
+        {
+            Session["CAPTCHA"] = GetRandomText();
+            return View();
+        }
+
         // GET: /Account/VerifyCode
         [AllowAnonymous]
         public async Task<ActionResult> VerifyCode(string provider, string returnUrl, bool rememberMe)
@@ -165,7 +249,7 @@ namespace DayBook.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, UserRole = model.UserRole,DateTime = DateTime.Now };
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, UserRole = model.UserRole, DateTime = DateTime.Now };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -345,7 +429,7 @@ namespace DayBook.Controllers
             switch (result)
             {
                 case SignInStatus.Success:
-                     return RedirectToLocal(returnUrl);
+                    return RedirectToLocal(returnUrl);
                 case SignInStatus.LockedOut:
                     return View("Lockout");
                 case SignInStatus.RequiresVerification:
@@ -461,7 +545,7 @@ namespace DayBook.Controllers
             {
                 return Redirect(returnUrl);
             }
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("DayBook", "Index");
         }
 
         internal class ChallengeResult : HttpUnauthorizedResult

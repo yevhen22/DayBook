@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
@@ -10,13 +8,7 @@ using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using DayBook.Models;
 using DayBook.Content;
-using Microsoft.AspNet.Identity.EntityFramework;
-using System.Runtime.Remoting.Contexts;
-using System.IO;
-using System.Drawing;
-using System.Drawing.Text;
-using System.Drawing.Drawing2D;
-using System.Text;
+using CaptchaMvc.HtmlHelpers;
 
 namespace DayBook.Controllers
 {
@@ -83,13 +75,10 @@ namespace DayBook.Controllers
                 return View(model);
             }
 
-            if (Session["Captcha"] == null || Session["Captcha"].ToString() != model.Captcha)
+            if (!this.IsCaptchaValid("Validate your captcha"))
             {
-                ModelState.AddModelError("Captcha", "Wrong value of sum, please try again.");
-                //dispay error and generate a new captcha 
                 return View(model);
             }
-
             // This doesn't count login failures towards account lockout
             // To enable password failures to trigger account lockout, change to shouldLockout: true
             var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
@@ -122,68 +111,7 @@ namespace DayBook.Controllers
                     return View(model);
             }
         }
-
-
-        private string GetRandomText()
-        {
-            StringBuilder randomText = new StringBuilder();
-            string alphabets = "012345679ACEFGHKLMNPRSWXZabcdefghijkhlmnopqrstuvwxyz";
-            Random r = new Random();
-            for (int j = 0; j <= 5; j++)
-            {
-                randomText.Append(alphabets[r.Next(alphabets.Length)]);
-            }
-            return randomText.ToString();
-        }
-
-        public FileResult GetCaptchaImage()
-        {
-            string text = Session["CAPTCHA"].ToString();
-
-            //first, create a dummy bitmap just to get a graphics object
-            Image img = new Bitmap(1, 1);
-            Graphics drawing = Graphics.FromImage(img);
-
-            Font font = new Font("Arial", 15);
-            //measure the string to see how big the image needs to be
-            SizeF textSize = drawing.MeasureString(text, font);
-
-            //free up the dummy image and old graphics object
-            img.Dispose();
-            drawing.Dispose();
-
-            //create a new image of the right size
-            img = new Bitmap((int)textSize.Width + 40, (int)textSize.Height + 20);
-            drawing = Graphics.FromImage(img);
-
-            Color backColor = Color.SeaShell;
-            Color textColor = Color.Red;
-            //paint the background
-            drawing.Clear(backColor);
-
-            //create a brush for the text
-            Brush textBrush = new SolidBrush(textColor);
-
-            drawing.DrawString(text, font, textBrush, 20, 10);
-
-            drawing.Save();
-
-            font.Dispose();
-            textBrush.Dispose();
-            drawing.Dispose();
-
-            MemoryStream ms = new MemoryStream();
-            img.Save(ms, System.Drawing.Imaging.ImageFormat.Png);
-            img.Dispose();
-
-            return File(ms.ToArray(), "image/png");
-        }
-
-        public ActionResult CustomCaptcha()
-        {
-            Session["CAPTCHA"] = GetRandomText();
-            return View();
-        }
+     
 
         // GET: /Account/VerifyCode
         [AllowAnonymous]

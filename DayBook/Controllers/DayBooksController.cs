@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
 using System.Web.UI;
+using DayBook.Content;
 using DayBook.Models;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
@@ -26,11 +27,21 @@ namespace DayBook.Controllers
             var daybooks = await db.DayBooks.Where(p => p.ApplicationUserId.Equals(currentUserId)).ToListAsync();
             if (daybooks != null)
             {
+                if (daybooks.Count > 0)
+                    daybooks = DectyptRecords(daybooks);
                 return View(daybooks);
             }
             return View();
         }
 
+        private List<DayBookModel> DectyptRecords(List<DayBookModel> dayBooks)
+        {
+            for (int i = 0; i < dayBooks.Count; i++)
+            {
+                dayBooks[i].DayRecord = Transposition.GetDecryptedString(dayBooks[i].DayRecord);
+            }
+            return dayBooks;
+        }
 
         // GET: DayBooks/Details/5
         public async Task<ActionResult> Details(int? id)
@@ -67,7 +78,7 @@ namespace DayBook.Controllers
                 dayBook.ApplicationUser = currentUser;
                 dayBook.ApplicationUserId = User.Identity.GetUserId();
                 dayBook.CreationTime = DateTime.Now;
-                //dayBook.DayRecord = CryptoHelper.Encode(dayBook.DayRecord).ToString();
+                dayBook.DayRecord = Transposition.GetEncryptedString(dayBook.DayRecord);
                 db.DayBooks.Add(dayBook);
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -83,6 +94,7 @@ namespace DayBook.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             DayBookModel dayBook = await db.DayBooks.FindAsync(id);
+            dayBook.DayRecord = Transposition.Decrypt(dayBook.DayRecord);
             if (dayBook == null)
             {
                 return HttpNotFound();

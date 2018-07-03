@@ -50,9 +50,13 @@
       <HintPath>..\packages\CaptchaMvc.Mvc5.1.5.0\lib\net45-full\CaptchaMvc.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Quartz, Version=3.0.5.0, Culture=neutral, PublicKeyToken=f6b8c98a402cc8a4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Quartz.3.0.5\lib\net452\Quartz.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
@@ -202,11 +206,16 @@
     <Compile Include="Content\CustomHelpers\Transposition.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\DayBooksController.cs" />
+    <Compile Include="Controllers\DeleteAccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
+    <Compile Include="DataLayer\DataRepository.cs" />
+    <Compile Include="DataLayer\IDataRepository.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="JobsScheduler\AccountRemover.cs" />
+    <Compile Include="JobsScheduler\Scheduler.cs" />
     <Compile Include="Migrations\201806191024212_roles.cs" />
     <Compile Include="Migrations\201806191024212_roles.Designer.cs">
       <DependentUpon>201806191024212_roles.cs</DependentUpon>
@@ -219,13 +228,25 @@
     <Compile Include="Migrations\201806241617551_daybookmodelfixes.Designer.cs">
       <DependentUpon>201806241617551_daybookmodelfixes.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201807030638279_added delet user table.cs" />
+    <Compile Include="Migrations\201807030638279_added delet user table.Designer.cs">
+      <DependentUpon>201807030638279_added delet user table.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\201807030822563_changes type.cs" />
+    <Compile Include="Migrations\201807030822563_changes type.Designer.cs">
+      <DependentUpon>201807030822563_changes type.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\CaptchaUtility.cs" />
     <Compile Include="Models\DayBookModel.cs" />
+    <Compile Include="Models\DeleteUserModel.cs" />
     <Compile Include="Models\EmailFormModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\Pagination\IndexViewModel.cs" />
+    <Compile Include="Models\Pagination\PageInfo.cs" />
+    <Compile Include="Models\Pagination\PagingHelper.cs" />
     <Compile Include="Models\TokenHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
@@ -294,6 +315,7 @@
     <Content Include="Views\DayBooks\Details.cshtml" />
     <Content Include="Views\DayBooks\Edit.cshtml" />
     <Content Include="Views\DayBooks\Index.cshtml" />
+    <Content Include="Views\DeleteAccount\Delete.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -320,6 +342,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201806241617551_daybookmodelfixes.resx">
       <DependentUpon>201806241617551_daybookmodelfixes.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201807030638279_added delet user table.resx">
+      <DependentUpon>201807030638279_added delet user table.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201807030822563_changes type.resx">
+      <DependentUpon>201807030822563_changes type.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -14,6 +14,7 @@ namespace DayBook
         {
             ConfigureAuth(app);
             CreateRoles();
+
         }
 
         public void CreateRoles()

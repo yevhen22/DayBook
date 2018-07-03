@@ -1,4 +1,6 @@
-﻿@model IEnumerable<DayBook.Models.DayBookModel>
+﻿@*@model IEnumerable<DayBook.Models.DayBookModel>*@
+@model DayBook.Models.Pagination.IndexViewModel
+@using DayBook.Models.Pagination;
 
 @{
     ViewBag.Title = "Index";
@@ -12,34 +14,27 @@
 <table class="table">
     <tr>
         <th>
-            @Html.DisplayNameFor(model => model.DayRecord)
+            @Html.DisplayNameFor(model => model.Records)
         </th>
-        @*<th>
-            @Html.DisplayNameFor(model => model.CreationTime)
-        </th>
-        <th>
-            @Html.DisplayNameFor(model => model.ApplicationUserId)
-        </th>*@
+
         <th></th>
     </tr>
 
-@foreach (var item in Model) {
-    <tr>
-        <td>
-            @Html.DisplayFor(modelItem => item.DayRecord)
-        </td>
-        @*<td>
-            @Html.DisplayFor(modelItem => item.CreationTime)
-        </td>
-        <td>
-            @Html.DisplayFor(modelItem => item.ApplicationUserId)
-        </td>*@
-        <td>
-            @Html.ActionLink("Edit", "Edit", new { id=item.DayBookModelId }) |
-            @Html.ActionLink("Details", "Details", new { id=item.DayBookModelId }) |
-            @Html.ActionLink("Delete", "Delete", new { id=item.DayBookModelId })
-        </td>
-    </tr>
-}
+    @foreach (var item in Model.Records)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.DayRecord)
+            </td>
 
+            <td>
+                @Html.ActionLink("Edit", "Edit", new { id = item.DayBookModelId }) |
+                @Html.ActionLink("Details", "Details", new { id = item.DayBookModelId }) |
+                @Html.ActionLink("Delete", "Delete", new { id = item.DayBookModelId })
+            </td>
+        </tr>
+    }
 </table>
+<div class="btn-group">
+    @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { page = x }))
+</div>

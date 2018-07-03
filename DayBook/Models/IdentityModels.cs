@@ -29,6 +29,9 @@ namespace DayBook.Models
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public DbSet<DayBookModel> DayBooks { get; set; }
+
+        public DbSet<DeleteUserModel> DeleteUserModels{ get; set; }
+
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
         {

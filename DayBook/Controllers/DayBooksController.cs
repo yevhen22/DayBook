@@ -11,6 +11,7 @@ using System.Web.Mvc;
 using System.Web.UI;
 using DayBook.Content;
 using DayBook.Models;
+using DayBook.Models.Pagination;
 using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 
@@ -20,8 +21,7 @@ namespace DayBook.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
-        // GET: DayBooks
-        public async Task<ActionResult> Index()
+        public async Task<ActionResult> Index(int page = 1)
         {
             string currentUserId = User.Identity.GetUserId();
             var daybooks = await db.DayBooks.Where(p => p.ApplicationUserId.Equals(currentUserId)).ToListAsync();
@@ -29,9 +29,14 @@ namespace DayBook.Controllers
             {
                 if (daybooks.Count > 0)
                     daybooks = DectyptRecords(daybooks);
-                return View(daybooks);
+                //return View(daybooks);
             }
-            return View();
+            //return View();
+            int pageSize = 3; 
+            IEnumerable <DayBookModel> recordsPerPage = daybooks.Skip((page - 1) * pageSize).Take(pageSize);
+            PageInfo pageInfo = new PageInfo { PageNumber = page, PageSize = pageSize, TotalItems = daybooks.Count };
+            Models.Pagination.IndexViewModel ivm = new Models.Pagination.IndexViewModel { PageInfo = pageInfo, Records = recordsPerPage };
+            return View(ivm);
         }
 
         private List<DayBookModel> DectyptRecords(List<DayBookModel> dayBooks)
@@ -94,7 +99,7 @@ namespace DayBook.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             DayBookModel dayBook = await db.DayBooks.FindAsync(id);
-            dayBook.DayRecord = Transposition.Decrypt(dayBook.DayRecord);
+            dayBook.DayRecord = Transposition.GetDecryptedString(dayBook.DayRecord);
             if (dayBook == null)
             {
                 return HttpNotFound();

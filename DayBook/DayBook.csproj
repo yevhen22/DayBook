@@ -236,6 +236,10 @@
     <Compile Include="Migrations\201807030822563_changes type.Designer.cs">
       <DependentUpon>201807030822563_changes type.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\201807100917080_fix10.cs" />
+    <Compile Include="Migrations\201807100917080_fix10.Designer.cs">
+      <DependentUpon>201807100917080_fix10.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\CaptchaUtility.cs" />
@@ -316,6 +320,7 @@
     <Content Include="Views\DayBooks\Edit.cshtml" />
     <Content Include="Views\DayBooks\Index.cshtml" />
     <Content Include="Views\DeleteAccount\Delete.cshtml" />
+    <Content Include="Views\DayBooks\SearchedItems.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -348,6 +353,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\201807030822563_changes type.resx">
       <DependentUpon>201807030822563_changes type.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\201807100917080_fix10.resx">
+      <DependentUpon>201807100917080_fix10.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

@@ -1,23 +1,11 @@
-﻿@*@model IEnumerable<DayBook.Models.DayBookModel>*@
-@model DayBook.Models.Pagination.IndexViewModel
+﻿@model DayBook.Models.Pagination.IndexViewModel
 @using DayBook.Models.Pagination;
 
 @{
-    ViewBag.Title = "Index";
+    ViewBag.Title = "SearchedItems";
 }
 
-<h2>Index</h2>
-
-<p>
-    @Html.ActionLink("Create New", "Create")
-</p>
-
-<form>
-    <p>
-        Title: <input type="text" name="SearchString">
-        <input type="submit" value="Filter" formaction=@Url.Action("SearchedItems") />
-    </p>
-</form>
+<h2>SearchedItems</h2>
 
 <table class="table">
     <tr>
@@ -43,6 +31,3 @@
         </tr>
     }
 </table>
-<div class="btn-group">
-    @Html.PageLinks(Model.PageInfo, x => Url.Action("Index", new { page = x }))
-</div>

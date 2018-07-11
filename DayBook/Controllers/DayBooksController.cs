@@ -21,6 +21,7 @@ namespace DayBook.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
+        [HttpGet]
         public async Task<ActionResult> Index(int page = 1)
         {
             string currentUserId = User.Identity.GetUserId();
@@ -29,15 +30,40 @@ namespace DayBook.Controllers
             {
                 if (daybooks.Count > 0)
                     daybooks = DectyptRecords(daybooks);
-                //return View(daybooks);
             }
-            //return View();
-            int pageSize = 3; 
-            IEnumerable <DayBookModel> recordsPerPage = daybooks.Skip((page - 1) * pageSize).Take(pageSize);
+            int pageSize = 3;
+            IEnumerable<DayBookModel> recordsPerPage = daybooks.Skip((page - 1) * pageSize).Take(pageSize);
             PageInfo pageInfo = new PageInfo { PageNumber = page, PageSize = pageSize, TotalItems = daybooks.Count };
             Models.Pagination.IndexViewModel ivm = new Models.Pagination.IndexViewModel { PageInfo = pageInfo, Records = recordsPerPage };
             return View(ivm);
         }
+
+
+        public async Task<ActionResult> SearchedItems(string searchString, int page = 1)
+        {
+            List<DayBookModel> Mathes = new List<DayBookModel>();
+            IEnumerable<DayBookModel> matchedRecords;
+            string currentUserId = User.Identity.GetUserId();
+            var daybooks = await db.DayBooks.Where(p => p.ApplicationUserId.Equals(currentUserId)).ToListAsync();
+            if (daybooks != null)
+            {
+                if (daybooks.Count > 0)
+                    daybooks = DectyptRecords(daybooks);
+            }
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                matchedRecords = daybooks.Where(p => p.DayRecord.Contains(searchString));
+                Mathes = matchedRecords.ToList();
+            }
+
+            int pageSize = 3;
+            IEnumerable<DayBookModel> recordsPerPage = Mathes.Skip((page - 1) * pageSize).Take(pageSize);
+            PageInfo pageInfo = new PageInfo { PageNumber = page, PageSize = pageSize, TotalItems = Mathes.Count };
+            Models.Pagination.IndexViewModel ivm = new Models.Pagination.IndexViewModel { PageInfo = pageInfo, Records = recordsPerPage };
+            return View(ivm);
+        }
+
 
         private List<DayBookModel> DectyptRecords(List<DayBookModel> dayBooks)
         {
@@ -131,7 +157,7 @@ namespace DayBook.Controllers
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
             DayBookModel dayBook = await db.DayBooks.FindAsync(id);
-
+            dayBook.DayRecord = Transposition.GetDecryptedString(dayBook.DayRecord);
             if (dayBook == null)
             {
                 return HttpNotFound();

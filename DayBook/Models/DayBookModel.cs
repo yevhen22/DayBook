@@ -11,6 +11,8 @@ namespace DayBook.Models
     {
         [Key]
         public int DayBookModelId { get; set; }
+
+        [MaxLength(500)]
         public string DayRecord { get; set; }
         public DateTime CreationTime { get; set; }
 

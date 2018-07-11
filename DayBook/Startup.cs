@@ -4,6 +4,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.Owin;
 using Owin;
+using System;
 
 [assembly: OwinStartupAttribute(typeof(DayBook.Startup))]
 namespace DayBook
@@ -21,17 +22,25 @@ namespace DayBook
         {
             ApplicationDbContext context = new ApplicationDbContext();
             var roleManager = new RoleManager<IdentityRole>(new RoleStore<IdentityRole>(context));
-            if (!roleManager.RoleExists(ConstHelper.ADMINROLE))
+            try
             {
-                var adminRole = new IdentityRole();
-                adminRole.Name = ConstHelper.ADMINROLE;
-                roleManager.Create(adminRole);
+
+                if (!roleManager.RoleExists(ConstHelper.ADMINROLE))
+                {
+                    var adminRole = new IdentityRole();
+                    adminRole.Name = ConstHelper.ADMINROLE;
+                    roleManager.Create(adminRole);
+                }
+                if (!roleManager.RoleExists(ConstHelper.USERROLE))
+                {
+                    var userRole = new IdentityRole();
+                    userRole.Name = ConstHelper.USERROLE;
+                    roleManager.Create(userRole);
+                }
             }
-            if (!roleManager.RoleExists(ConstHelper.USERROLE))
+            catch (Exception exc)
             {
-                var userRole = new IdentityRole();
-                userRole.Name = ConstHelper.USERROLE;
-                roleManager.Create(userRole);
+
             }
 
         }

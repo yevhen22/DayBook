@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
-using System.Web.UI;
 using DayBook.Content;
 using DayBook.Models;
 using DayBook.Models.Pagination;
+using DayBook.Models.ViewModels;
 using Microsoft.AspNet.Identity;
-using Microsoft.AspNet.Identity.EntityFramework;
 
 namespace DayBook.Controllers
 {
@@ -38,7 +37,12 @@ namespace DayBook.Controllers
             return View(ivm);
         }
 
-
+        /// <summary>
+        /// Get all coincidences that found in the database records 
+        /// </summary>
+        /// <param name="searchString"></param>
+        /// <param name="page"></param>
+        /// <returns></returns>
         public async Task<ActionResult> SearchedItems(string searchString, int page = 1)
         {
             List<DayBookModel> Mathes = new List<DayBookModel>();
@@ -64,7 +68,11 @@ namespace DayBook.Controllers
             return View(ivm);
         }
 
-
+        /// <summary>
+        /// Decode day record row from database to initial view
+        /// </summary>
+        /// <param name="dayBooks"></param>
+        /// <returns></returns>
         private List<DayBookModel> DectyptRecords(List<DayBookModel> dayBooks)
         {
             for (int i = 0; i < dayBooks.Count; i++)
@@ -74,19 +82,31 @@ namespace DayBook.Controllers
             return dayBooks;
         }
 
-        // GET: DayBooks/Details/5
+
+
+       /// <summary>
+       /// Get record details and show full data description which all images
+       /// </summary>
+       /// <param name="id"></param>
+       /// <returns></returns>
         public async Task<ActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
+            DayRecordViewModel viewModel = new DayRecordViewModel();
             DayBookModel dayBook = await db.DayBooks.FindAsync(id);
+            var Images = db.ImageModels.Where(p => p.DayBookModelId == dayBook.DayBookModelId);
+            viewModel.DayRecord = Transposition.GetDecryptedString(dayBook.DayRecord);
+            viewModel.ImageModels = await db.ImageModels.Where(p => p.DayBookModelId.Equals(dayBook.DayBookModelId)).ToListAsync(); ;
+
             if (dayBook == null)
             {
                 return HttpNotFound();
             }
-            return View(dayBook);
+
+            return View(viewModel);
         }
 
         // GET: DayBooks/Create
@@ -95,27 +115,45 @@ namespace DayBook.Controllers
             return View();
         }
 
-        // POST: DayBooks/Create
-        // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
-        // more details see https://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
+       
+        /// <summary>
+        /// Create new record with day description and one image 
+        /// </summary>
+        /// <param name="record"></param>
+        /// <param name="uploadImage"></param>
+        /// <returns></returns>
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "DayBoolKey,DayRecord,CreationTime,ApplicationUserId")] DayBookModel dayBook)
+        public async Task<ActionResult> Create(DayRecordViewModel record, HttpPostedFileBase uploadImage)
         {
             if (ModelState.IsValid)
             {
                 string currentUserId = User.Identity.GetUserId();
                 ApplicationUser currentUser = db.Users.FirstOrDefault(x => x.Id == currentUserId);
+                DayBookModel dayBook = new DayBookModel();
                 dayBook.ApplicationUser = currentUser;
                 dayBook.ApplicationUserId = User.Identity.GetUserId();
                 dayBook.CreationTime = DateTime.Now;
-                dayBook.DayRecord = Transposition.GetEncryptedString(dayBook.DayRecord);
+                dayBook.DayRecord = Transposition.GetEncryptedString(record.DayRecord);
                 db.DayBooks.Add(dayBook);
+
+                ImageModel imageModel = new ImageModel();
+                byte[] imageData;
+                using (var binaryReader = new BinaryReader(uploadImage.InputStream))
+                {
+                    imageData = binaryReader.ReadBytes(uploadImage.ContentLength);
+                }
+
+                imageModel.ImageTitle = record.ImageTitle;
+                imageModel.ImageByte = imageData;
+                imageModel.DayBookModel = dayBook;
+                db.ImageModels.Add(imageModel);
+
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            return View(dayBook);
+            return View(record);
         }
+
 
         // GET: DayBooks/Edit/5
         public async Task<ActionResult> Edit(int? id)
@@ -142,6 +180,7 @@ namespace DayBook.Controllers
         {
             if (ModelState.IsValid)
             {
+                dayBook.DayRecord = Transposition.GetEncryptedString(dayBook.DayRecord);
                 db.Entry(dayBook).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -180,6 +219,11 @@ namespace DayBook.Controllers
             return RedirectToAction("Index");
         }
 
+        /// <summary>
+        /// Check whether expired two days from creation time
+        /// </summary>
+        /// <param name="dayBook"></param>
+        /// <returns></returns>
         private bool CheckCreationalTime(DayBookModel dayBook)
         {
             double differenceInDays = (DateTime.Now - dayBook.CreationTime).TotalDays;
@@ -189,6 +233,7 @@ namespace DayBook.Controllers
                 return true;
         }
 
+       
         protected override void Dispose(bool disposing)
         {
             if (disposing)

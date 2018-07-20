@@ -19,5 +19,9 @@ namespace DayBook.Models
 
         public string ApplicationUserId { get; set; }
         public virtual ApplicationUser ApplicationUser { get; set; }
+
+        public virtual ICollection<ImageModel> ImageModels { get; set; }
+
+
     }
 }

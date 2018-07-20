@@ -31,6 +31,7 @@ namespace DayBook.Models
         public DbSet<DayBookModel> DayBooks { get; set; }
 
         public DbSet<DeleteUserModel> DeleteUserModels{ get; set; }
+        public DbSet<ImageModel> ImageModels{ get; set; }
 
         public ApplicationDbContext()
             : base("DefaultConnection", throwIfV1Schema: false)
@@ -50,6 +51,10 @@ namespace DayBook.Models
             modelBuilder.Entity<ApplicationUser>()
                             .HasMany(p => p.DayBooks)
                             .WithRequired(p => p.ApplicationUser);
+
+            modelBuilder.Entity<DayBookModel>()
+                .HasMany(p => p.ImageModels)
+                .WithRequired(p=>p.DayBookModel);
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model DayBook.Models.DayBookModel
+﻿@model DayBook.Models.ViewModels.DayRecordViewModel
 
 @{
     ViewBag.Title = "Details";
@@ -18,18 +18,31 @@
             @Html.DisplayFor(model => model.DayRecord)
         </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.CreationTime)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.CreationTime)
-        </dd>
-
-
     </dl>
+
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Image</th>
+        </tr>
+
+        @foreach (var item in Model.ImageModels)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ImageTitle)
+                </td>
+                <td>
+                    @Html.Raw("<img style='width:180px; height:160px;' src=\"data:image/jpeg;base64,"
+                                        + Convert.ToBase64String(item.ImageByte) + "\" />")
+                </td>
+            </tr>
+        }
+
+    </table>
+
 </div>
 <p>
-    @Html.ActionLink("Edit", "Edit", new { id = Model.DayBookModelId }) |
+    @*@Html.ActionLink("Edit", "Edit", new { id = Model.DayBookModelId }) |*@
     @Html.ActionLink("Back to List", "Index")
 </p>
